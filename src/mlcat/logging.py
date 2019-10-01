@@ -1,4 +1,4 @@
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 class MetricWatcher():
     def __init__(self, watch_vars):
