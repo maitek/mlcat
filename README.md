@@ -38,3 +38,4 @@ with MetricWatcher(watch_vars = ["a", "b"]) as mw:
 | a: 4 | b: 16 |  
 ~~~~
 
+[Notebook example](https://github.com/maitek/mlcat/blob/master/examples/metric_watcher_example.ipynb)
