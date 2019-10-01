@@ -1,0 +1,8 @@
+*.png
+*.jpg
+.DS_Store
+__pycache__
+*.pyc
+build/
+dist/
+*.egg-info/
