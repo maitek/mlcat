@@ -29,11 +29,14 @@ class MetricWatcher():
         print("| {} ".format(metrics_str))
     
 
-    def plot_metrics(self, metrics=None):
+    def plot_metrics(self, metrics=None, show=True):
         if metrics is None:
             metrics = self.watch_vars
         for var in metrics:
             plt.plot(self.history[var],label=var)
+        if show:
+            plt.legend()
+            plt.show()
 
 ## Tests
 
