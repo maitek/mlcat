@@ -12,12 +12,11 @@ class MetricWatcher():
     def __exit__(self, *args):
         pass
 
-    def update(self):
-        global_vars = globals()
+    def update(self, scope):
         metrics = {}
         
         for var in self.watch_vars:
-            metrics[var] = global_vars.get(var, "")
+            metrics[var] = scope.get(var, "")
             self.history[var].append(metrics[var])
         title = ""
         
