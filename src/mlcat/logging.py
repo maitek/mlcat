@@ -19,12 +19,53 @@ class MetricWatcher():
             self.history[var].append(self.metrics[var])
         title = ""
         
-    def print_metrics(self):
+    def print_metrics(self, metrics=None):
+        if metrics is None:
+            metrics = self.watch_vars
+        
         metrics_str = "".join(
-            ["{}: {} | ".format(k,v) for k, v in self.metrics.items()]
+            ["{}: {} | ".format(k,v) for k, v in self.metrics.items() if k in metrics]
         )
         print("| {} ".format(metrics_str))
     
 
-    def plot_history(self,var):
-        plt.plot(self.history[var],label=var)
+    def plot_metrics(self, metrics=None):
+        if metrics is None:
+            metrics = self.watch_vars
+        for var in metrics:
+            plt.plot(self.history[var],label=var)
+
+## Tests
+
+def test_print_metrics_1():
+    with MetricWatcher(watch_vars = ["a", "b"]) as mw:
+        for a in range(5):
+            b = a**2
+            mw.update(scope=locals())
+            mw.print_metrics()
+
+def test_print_metrics_2():
+    with MetricWatcher(watch_vars = ["a", "b"]) as mw:
+        for a in range(5):
+            b = a**2
+            mw.update(scope=locals())
+            mw.print_metrics(metrics=["a"])
+
+## Tests
+
+def test_plot_metrics_1():
+    with MetricWatcher(watch_vars = ["a", "b"]) as mw:
+        for a in range(5):
+            b = a**2
+            mw.update(scope=locals())
+            mw.plot_metrics()
+
+def test_plot_metrics_2():
+    with MetricWatcher(watch_vars = ["a", "b"]) as mw:
+        for a in range(5):
+            b = a**2
+            mw.update(scope=locals())
+            mw.plot_metrics(metrics=["a"])
+
+
+
