@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import csv
 import json
+import numpy as np
 
 class MetricWatcher():
     def __init__(self, watch_vars):
@@ -38,24 +39,22 @@ class MetricWatcher():
         if metrics is None:
             metrics = self.watch_vars
         for var in metrics:
-            data = [x[var] for x in self.history]
+            data = [x.get(var,np.nan) for x in self.history]
             plt.plot(data,label=var)
         if show:
             plt.legend()
             plt.show()
 
-    # def export_csv():
+    def export_csv(self, file_name):
+        with open(file_name, 'w') as f:  # Just use 'w' mode in 3.x
+            w = csv.DictWriter(f, self.history[0].keys())
+            w.writeheader()
+            for metric in self.history:
+                w.writerow(metric)
 
-    #     for 
-
-    #     csv_dict = {"test": 1, "testing": 2}
-
-    #     with open('mycsvfile.csv', 'wb') as f:  # Just use 'w' mode in 3.x
-    #         w = csv.DictWriter(f, my_dict.keys())
-    #         w.writeheader()
-    #         w.writerow(my_dict)
-
-    # def export_json():
+    def export_json(self, file_name):
+        with open(file_name, 'w') as f:
+            json.dump(self.history,f)
 
 ## Tests
 
