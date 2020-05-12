@@ -8,8 +8,9 @@ class UnivBlock(nn.Module):
         super(UnivBlock, self).__init__()
 
         self.skip_path = nn.Conv2d(in_ch, out_ch, 1, padding=0, bias=False)
+        squeeze_factor = 0.5
 
-        h_ch = ceil(in_ch*squeeze_factor)
+        h_ch = math.ceil(in_ch*squeeze_factor)
 
         # TODO use weight normalization instead of batch or instance normalization
         self.conv = nn.Sequential(
@@ -66,8 +67,8 @@ class UnivNet(nn.Module):
         self.in_dim = in_dim
         self.out_dim = out_dim
 
-        in_size = min(in_dim[0],in_dim[1])
-        out_size = min(out_dim[0],out_dim[1])
+        in_size = min(in_dim[1],in_dim[2])
+        out_size = min(out_dim[1],out_dim[2])
 
         # maximum amount of downsample
         num_down = int(math.log2(in_size))
@@ -79,29 +80,31 @@ class UnivNet(nn.Module):
 
         for i in range(num_down):
             # UnivDown
-            out_ch = in_ch*4 # 
-            self.down_layers.append(nn.UnivDown, in_ch, out_ch)
+            out_ch = in_ch # 
+            self.down_layers.append(UnivDown(in_ch, out_ch))
             in_ch = out_ch
-            
-            # UnivBlock
-            self.down_layers.append(nn.UnivBlock(in_ch, out_ch))
-            
+                        
+        
+
         for i in range(num_up):
             # UnivUp
-            out_ch = in_ch//4
-            self.up_layers.append(nn.UnivUp, in_ch, out_ch)
+            out_ch = in_ch
+            self.up_layers.append(UnivUp(in_ch, out_ch))
             in_ch = out_ch
 
         for idx, module in enumerate(self.down_layers):
-            self.add_module("".format("down_",str(idx)), self.down_layers)
+            self.add_module("{}".format("down_",str(idx)), module)
 
         for idx, module in enumerate(self.up_layers):
-            self.add_module("".format("up_",str(idx)), self.up_layers)
+            self.add_module("{}".format("up_",str(idx)), module)
 
         self.up = nn.Upsample(2, mode='bilinear')
-        
+       
     def forward(self,x):
         res_down = []
+        
+        import pdb; pdb.set_trace()
+        
         for layer in self.down_layers:
             res_down.append(x)
             x = layer(x)
@@ -114,9 +117,9 @@ class UnivNet(nn.Module):
 
 if __name__ == "__main__":
 
-    net = UnivNet(in_dim=(1,28,28), out_dim=(1,8,8))
+    net = UnivNet(in_dim=(1,32,32), out_dim=(1,16,16))
     
-    x = torch.Tensor((1,1,28,28))
+    x = torch.rand((1,1,32,32))
     y = net.forward(x)
 
 
