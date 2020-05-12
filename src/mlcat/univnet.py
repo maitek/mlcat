@@ -1,11 +1,11 @@
-import pytorch.nn as nn
+import torch.nn as nn
 import torch
+import torch.functional as F
+import math
 
-
-
-class UnivBlock(nn.modules):
-    def __init__(self, in_ch, out_ch, squeeze_factor=0.8):
-        super(double_conv, self).__init__()
+class UnivBlock(nn.Module):
+    def __init__(self, in_ch, out_ch):
+        super(UnivBlock, self).__init__()
 
         self.skip_path = nn.Conv2d(in_ch, out_ch, 1, padding=0, bias=False)
 
@@ -28,9 +28,9 @@ class UnivBlock(nn.modules):
         x += self.skip_path(residual)
         return x
 
-class UnivDown(nn.modules):
+class UnivDown(nn.Module):
     def __init__(self, in_ch, out_ch):
-        super(down, self).__init__()
+        super(UnivDown, self).__init__()
 
         self.mpconv = nn.Sequential(
             nn.MaxPool2d(2),
@@ -44,7 +44,7 @@ class UnivDown(nn.modules):
 
 class UnivUp(nn.Module):
     def __init__(self, in_ch, out_ch):
-        super(up, self).__init__()
+        super(UnivUp, self).__init__()
 
         self.up = nn.Upsample(2, mode='bilinear')
         self.conv = UnivBlock(in_ch, out_ch)
@@ -59,24 +59,25 @@ class UnivUp(nn.Module):
         x = self.conv(x)
         return x
 
-class UnivNet(nn.modules):
+class UnivNet(nn.Module):
     # Auto generate blocks based on in and out specification
-    def __init__(in_dim, out_dim, hidden_layers=1)
+    def __init__(self, in_dim, out_dim):
+        super(UnivNet, self).__init__()
         self.in_dim = in_dim
         self.out_dim = out_dim
 
-        in_size = np.min(in_dim[0],in_dim[1])
-        out_size = np.min(out_dim[0],out_dim[1])
+        in_size = min(in_dim[0],in_dim[1])
+        out_size = min(out_dim[0],out_dim[1])
 
         # maximum amount of downsample
-        num_down = int(np.log2(in_size))
-        num_up = int(np.log2(up_size))        
+        num_down = int(math.log2(in_size))
+        num_up = int(math.log2(out_size))        
         
         in_ch = in_dim[1]
         self.down_layers = []
         self.up_layers = []
 
-        for i range(max_down):
+        for i in range(num_down):
             # UnivDown
             out_ch = in_ch*4 # 
             self.down_layers.append(nn.UnivDown, in_ch, out_ch)
@@ -85,7 +86,7 @@ class UnivNet(nn.modules):
             # UnivBlock
             self.down_layers.append(nn.UnivBlock(in_ch, out_ch))
             
-        for i range(max_up):
+        for i in range(num_up):
             # UnivUp
             out_ch = in_ch//4
             self.up_layers.append(nn.UnivUp, in_ch, out_ch)
@@ -99,13 +100,13 @@ class UnivNet(nn.modules):
 
         self.up = nn.Upsample(2, mode='bilinear')
         
-    def forward(x):
+    def forward(self,x):
         res_down = []
-        for layer in self.down_layer():
-            down_out.append(x)
+        for layer in self.down_layers:
+            res_down.append(x)
             x = layer(x)
         
-        for layer in self.up_layer():
+        for layer in self.up_layers:
             x = layer(x,res_down)
 
         x = self.up(x)   
@@ -114,35 +115,34 @@ class UnivNet(nn.modules):
 if __name__ == "__main__":
 
     net = UnivNet(in_dim=(1,28,28), out_dim=(1,8,8))
-    net.forward(torch.Tensor((1,128,128))
-
-
-"""
-# Classifier
-C = AutoNN(in_dim = (28, 28, 1), out_dim = (10,1), depth=4, width=10)
-
-for x, t in enumerate(batches) 
-    y = C(x)
-    loss = cross_entropy(y, z)
-    loss.backward()
-    optimizer.update()
-
-
-
-
-
-# VAE
-E = AutoNN(in_dim = (128, 128, 3), out_dim = (100, 1), depth=10, width=10)
-D = AutoNN(in_dim = (100, 1), out_dim = (128, 128, 3), depth=10, width=10)
-
-for x, _ in enumerate(batches) 
-    z = E(x)
-    y = D(x)
-    z = torch.randn(100)
-
-    loss = mse_loss(x, y) + kl_loss(y,z_)
-    loss.backward()
-    optimizer.update()
     
+    x = torch.Tensor((1,1,28,28))
+    y = net.forward(x)
+
+
     
-"""
+    # # Classifier
+    # C = AutoNN(in_dim = (28, 28, 1), out_dim = (10,1), depth=4, width=10)
+
+    # for x, t in enumerate(batches) 
+    #     y = C(x)
+    #     loss = cross_entropy(y, z)
+    #     loss.backward()
+    #     optimizer.update()
+
+
+
+
+
+    # # VAE
+    # E = AutoNN(in_dim = (128, 128, 3), out_dim = (100, 1), depth=10, width=10)
+    # D = AutoNN(in_dim = (100, 1), out_dim = (128, 128, 3), depth=10, width=10)
+
+    # for x, _ in enumerate(batches) 
+    #     z = E(x)
+    #     y = D(x)
+    #     z = torch.randn(100)
+
+    #     loss = mse_loss(x, y) + kl_loss(y,z_)
+    #     loss.backward()
+    #     optimizer.update()
